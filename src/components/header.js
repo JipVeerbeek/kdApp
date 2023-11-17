@@ -7,29 +7,20 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-// import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-export default function AppHeader() {
-  // const navigation = useNavigation();
-
-  // const handleIconPress = () => {
-  //   Navigate to another screen
-  //   navigation.navigate("AnotherScreen");
-  // };
+export default function AppHeader({ route }) {
+  const { name } = route;
 
   return (
     <SafeAreaView>
       <StatusBar backgroundColor="black" />
 
       <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          // onPress={console.log("press")}
-        >
-          <Icon name="question-circle-o" size={32} />
+        <TouchableOpacity>
+          <Icon name="question-circle-o" size={35} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Home</Text>
+        <Text style={styles.headerText}>{name}</Text>
         <View style={styles.iconContainer} />
       </View>
     </SafeAreaView>
