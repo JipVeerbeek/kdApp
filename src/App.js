@@ -12,7 +12,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Home" // Set the initial screen to "Home"
+        initialRouteName="Welkom"
         screenOptions={{
           tabBarStyle: { display: 'flex' },
           tabBarItemStyle: { justifyContent: 'center' },
@@ -25,7 +25,7 @@ export default function App() {
           options={{ tabBarLabel: "Vacations" }}
         />
         <Tab.Screen
-          name="Home"
+          name="Welkom"
           component={HomeScreen}
           options={{ tabBarLabel: "Home" }}
         />
