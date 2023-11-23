@@ -5,6 +5,7 @@ import * as Location from "expo-location";
 
 const SettingsScreen = () => {
   const [location, setLocation] = useState(null);
+  const [city, setCity] = useState(null);
 
   useEffect(() => {
     getLocation();
@@ -20,22 +21,38 @@ const SettingsScreen = () => {
 
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation);
+      getCity(currentLocation.coords.latitude, currentLocation.coords.longitude);
     } catch (error) {
       console.error("Error getting location:", error);
     }
   };
-
+  
+  const getCity = async (latitude, longitude) => {
+    try {
+      let location = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+      if (location && location.length > 0) {
+        setCity(location[0].city);
+      }
+    } catch (error) {
+      console.error("Error getting city:", error);
+    }
+  };
+  
   return (
     <View style={styles.container}>
       {location ? (
-        location && (
+        <>
+          {city && <Text style={styles.heads}>Uw locatie: {city}</Text>}
           <MapView
             style={styles.map}
             initialRegion={{
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
-              latitudeDelta: 0.3,
-              longitudeDelta: 0.3,
+              latitudeDelta: 0.7,
+              longitudeDelta: 0.7,
             }}
             rotateEnabled={false}
           >
@@ -48,9 +65,9 @@ const SettingsScreen = () => {
               description="This is my current location"
             />
           </MapView>
-        )
+        </>
       ) : (
-        <Text style={styles.error}>Fix je settings maat</Text>
+        <Text style={styles.error}>Trying to get your location...</Text>
       )}
     </View>
   );
@@ -60,17 +77,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    // justifyContent: "center",
+  },
+  heads: {
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   map: {
-    // flex: 1,
     width: "100%",
     height: 300,
   },
   error: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: "bold",
-    color: "red",
   },
 });
 
