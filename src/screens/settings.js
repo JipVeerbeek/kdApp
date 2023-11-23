@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import regionsData from "./../regio.json";
 
 const SettingsScreen = () => {
   const [location, setLocation] = useState(null);
   const [city, setCity] = useState(null);
+  const [region, setRegion] = useState(null);
 
   useEffect(() => {
     getLocation();
@@ -35,17 +37,31 @@ const SettingsScreen = () => {
       });
       if (location && location.length > 0) {
         setCity(location[0].city);
+        determineRegion(location[0].city);
       }
     } catch (error) {
       console.error("Error getting city:", error);
     }
   };
-  
+
+  const determineRegion = (place) => {
+    for (const regio in regionsData) {
+      const placesInRegion = regionsData[regio];
+      for (const item of placesInRegion) {
+        if (item.Plaats === place) {
+          setRegion(regio);
+          return;
+        }
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       {location ? (
         <>
           {city && <Text style={styles.heads}>Uw locatie: {city}</Text>}
+          {region && <Text style={styles.heads}>Uw regio: {region}</Text>}
           <MapView
             style={styles.map}
             initialRegion={{
