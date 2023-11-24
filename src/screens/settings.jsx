@@ -63,14 +63,14 @@ const SettingsScreen = () => {
       for (const item of placesInRegion) {
         if (item.Plaats === place) {
           setRegion(regio);
-          return; // Stop zodra de regio is gevonden
+          return;
         }
       }
     }
   };
 
   const inputRegion = (text) => {
-    console.log(text);
+    // console.log(text);
     let foundRegion = null;
     let foundCity = null;
 
@@ -90,43 +90,28 @@ const SettingsScreen = () => {
 
     setSearchRegion(foundRegion);
     setSearchCity(foundCity);
-
-    if (!foundRegion && city) {
-      for (const regio in regionsData) {
-        const placesInRegion = regionsData[regio];
-        for (const item of placesInRegion) {
-          if (item.Plaats === city) {
-            setRegion(regio);
-            break;
-          }
-        }
-        if (region) {
-          break;
-        }
-      }
-    }
   };
 
   return (
     <View style={styles.container}>
       {location ? (
         <>
-          {city && <Text style={styles.heads}>Uw locatie: {city}</Text>}
-          {region && <Text style={styles.heads}>Uw regio: {region}</Text>}
+          {city && <Text style={styles.head1}>Uw locatie: {city}</Text>}
+          {region && <Text style={styles.head2}>Uw regio: {region}</Text>}
           <TextInput
             style={styles.input}
-            placeholder="Regio op plaatsnaam"
+            placeholder="Zoek regio op plaatsnaam"
             onChangeText={handleInputChange}
             value={text}
             autoFocus={false}
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
-          {searchCity && searchRegion && (
-            <Text style={styles.heads}>
+          {searchCity && searchRegion ? (
+            <Text style={styles.head2}>
               De plaats {searchCity} bevind zich in regio {searchRegion}
-            </Text>
-          )}
+            </Text> 
+          ) : (<Text>&nbsp;</Text>)}
           <MapView
             style={styles.map}
             initialRegion={{
@@ -136,6 +121,8 @@ const SettingsScreen = () => {
               longitudeDelta: 0.7,
             }}
             rotateEnabled={false}
+            scrollEnabled={false}
+            zoomEnabled={false}
           >
             <Marker
               coordinate={{
@@ -159,15 +146,24 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  heads: {
-    fontSize: 20,
+  head1: {
+    fontSize: 15,
     fontWeight: "bold",
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 15,
+  },
+  head2: {
+    fontSize: 15,
+    fontWeight: "bold",
+    paddingTop: 5,
+    paddingBottom: 15,
+    textAlign: "center",
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   map: {
     width: "90%",
     height: 400,
+    paddingTop: 20,
   },
   error: {
     fontSize: 25,
@@ -175,11 +171,12 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: "50%",
+    width: "60%",
     borderColor: "gray",
     borderWidth: 1,
     paddingHorizontal: 10,
     borderRadius: 5,
+    textAlign: "center",
   },
 });
 
