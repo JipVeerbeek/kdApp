@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screens/home";
@@ -6,6 +6,7 @@ import SettingsScreen from "./screens/settings";
 import VacationsScreen from "./screens/vacations";
 import AppHeader from "./components/header";
 import Icon from "react-native-vector-icons/FontAwesome";
+import * as Location from "expo-location";
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +19,22 @@ const TabIcon = ({ name, focused }) => (
 );
 
 export default function App() {
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Permission to access location was denied");
+        return;
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+    }
+  };
+
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -31,34 +48,37 @@ export default function App() {
       >
         <Tab.Screen
           name="Vacations"
-          component={VacationsScreen}
           options={{
             tabBarLabel: "Vacations",
             tabBarIcon: ({ focused }) => (
               <TabIcon name="suitcase" focused={focused} />
             ),
           }}
-        />
+        >
+          {(props) => <VacationsScreen {...props} />}
+        </Tab.Screen>
         <Tab.Screen
           name="Welkom"
-          component={HomeScreen}
           options={{
             tabBarLabel: "Home",
             tabBarIcon: ({ focused }) => (
               <TabIcon name="home" focused={focused} />
             ),
           }}
-        />
+        >
+          {(props) => <HomeScreen {...props} />}
+        </Tab.Screen>
         <Tab.Screen
           name="Settings"
-          component={SettingsScreen}
           options={{
             tabBarLabel: "Settings",
             tabBarIcon: ({ focused }) => (
               <TabIcon name="cog" focused={focused} />
             ),
           }}
-        />
+        >
+          {(props) => <SettingsScreen {...props} />}
+        </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, TextInput } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import regionsData from "./../regio.json";
@@ -8,6 +8,20 @@ const SettingsScreen = () => {
   const [location, setLocation] = useState(null);
   const [city, setCity] = useState(null);
   const [region, setRegion] = useState(null);
+  const [text, setText] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleInputChange = (input) => {
+    setText(input);
+    determineRegion(city, input);
+  };
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
 
   useEffect(() => {
     getLocation();
@@ -15,20 +29,17 @@ const SettingsScreen = () => {
 
   const getLocation = async () => {
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.error("Permission to access location was denied");
-        return;
-      }
-
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation);
-      getCity(currentLocation.coords.latitude, currentLocation.coords.longitude);
+      getCity(
+        currentLocation.coords.latitude,
+        currentLocation.coords.longitude
+      );
     } catch (error) {
       console.error("Error getting location:", error);
     }
   };
-  
+
   const getCity = async (latitude, longitude) => {
     try {
       let location = await Location.reverseGeocodeAsync({
@@ -44,11 +55,15 @@ const SettingsScreen = () => {
     }
   };
 
-  const determineRegion = (place) => {
+  const determineRegion = (place, text) => {
+    console.log(text);
     for (const regio in regionsData) {
       const placesInRegion = regionsData[regio];
       for (const item of placesInRegion) {
-        if (item.Plaats === place) {
+        if (item.Plaats === text) {
+          setRegion(regio);
+          return;
+        } else if (item.Plaats === place) {
           setRegion(regio);
           return;
         }
@@ -61,6 +76,16 @@ const SettingsScreen = () => {
       {location ? (
         <>
           {city && <Text style={styles.heads}>Uw locatie: {city}</Text>}
+          <Text>Handmatig de locatie instellen:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Plaatsnaam"
+            onChangeText={handleInputChange}
+            value={text}
+            autoFocus={false}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
           {region && <Text style={styles.heads}>Uw regio: {region}</Text>}
           <MapView
             style={styles.map}
@@ -101,12 +126,20 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   map: {
-    width: "100%",
-    height: 300,
+    width: "90%",
+    height: 400,
   },
   error: {
     fontSize: 25,
     fontWeight: "bold",
+  },
+  input: {
+    height: 40,
+    width: "40%",
+    borderColor: "gray",
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    borderRadius: 5,
   },
 });
 
