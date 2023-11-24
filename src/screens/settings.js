@@ -10,10 +10,12 @@ const SettingsScreen = () => {
   const [region, setRegion] = useState(null);
   const [text, setText] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const [searchCity, setSearchCity] = useState(null);
+  const [searchRegion, setSearchRegion] = useState(null);
 
   const handleInputChange = (input) => {
     setText(input);
-    determineRegion(city, input);
+    inputRegion(input);
   };
   const handleFocus = () => {
     setIsFocused(true);
@@ -55,17 +57,51 @@ const SettingsScreen = () => {
     }
   };
 
-  const determineRegion = (place, text) => {
-    console.log(text);
+  const determineRegion = (place) => {
     for (const regio in regionsData) {
       const placesInRegion = regionsData[regio];
       for (const item of placesInRegion) {
-        if (item.Plaats === text) {
+        if (item.Plaats === place) {
           setRegion(regio);
-          return;
-        } else if (item.Plaats === place) {
-          setRegion(regio);
-          return;
+          return; // Stop zodra de regio is gevonden
+        }
+      }
+    }
+  };
+
+  const inputRegion = (text) => {
+    console.log(text);
+    let foundRegion = null;
+    let foundCity = null;
+
+    for (const regio in regionsData) {
+      const placesInRegion = regionsData[regio];
+      for (const item of placesInRegion) {
+        if (item.Plaats.toLowerCase() === text.toLowerCase()) {
+          foundRegion = regio;
+          foundCity = item.Plaats;
+          break;
+        }
+      }
+      if (foundRegion) {
+        break;
+      }
+    }
+
+    setSearchRegion(foundRegion);
+    setSearchCity(foundCity);
+
+    if (!foundRegion && city) {
+      for (const regio in regionsData) {
+        const placesInRegion = regionsData[regio];
+        for (const item of placesInRegion) {
+          if (item.Plaats === city) {
+            setRegion(regio);
+            break;
+          }
+        }
+        if (region) {
+          break;
         }
       }
     }
@@ -76,17 +112,21 @@ const SettingsScreen = () => {
       {location ? (
         <>
           {city && <Text style={styles.heads}>Uw locatie: {city}</Text>}
-          <Text>Handmatig de locatie instellen:</Text>
+          {region && <Text style={styles.heads}>Uw regio: {region}</Text>}
           <TextInput
             style={styles.input}
-            placeholder="Plaatsnaam"
+            placeholder="Regio op plaatsnaam"
             onChangeText={handleInputChange}
             value={text}
             autoFocus={false}
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
-          {region && <Text style={styles.heads}>Uw regio: {region}</Text>}
+          {searchCity && searchRegion && (
+            <Text style={styles.heads}>
+              De plaats {searchCity} bevind zich in regio {searchRegion}
+            </Text>
+          )}
           <MapView
             style={styles.map}
             initialRegion={{
@@ -135,7 +175,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: "40%",
+    width: "50%",
     borderColor: "gray",
     borderWidth: 1,
     paddingHorizontal: 10,
