@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import IconA from 'react-native-vector-icons/FontAwesome';
+import IconA5 from 'react-native-vector-icons/FontAwesome5';
+import IconM from 'react-native-vector-icons/MaterialCommunityIcons';
+import IconF from 'react-native-vector-icons/Feather';
 
 
 const VacationsScreen = () => {
@@ -12,7 +16,7 @@ const VacationsScreen = () => {
       try {
         const response = await fetch('https://opendata.rijksoverheid.nl/v1/sources/rijksoverheid/infotypes/schoolholidays/schoolyear/2023-2024?output=json');
         
-        if (!response.ok) {
+        if (!response) {
           throw new Error('Network response was not ok.');
         }
 
@@ -28,53 +32,92 @@ const VacationsScreen = () => {
 
   const handleRegionChange = (region) => {
     setSelectedRegion(region);
-  };
+  };  
 
-  const filteredHolidays = holidaysData?.content[0]?.vacations.filter(
-    (holiday) => holiday.regions.some((r) => r.region === selectedRegion)
-  );
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+  
+    const formattedDay = day < 10 ? `0${day}` : day;
+    const formattedMonth = month < 10 ? `0${month}` : month;
+  
+    return `${formattedDay}-${formattedMonth}-${year}`;
+  };
+  
+  const formatHoliday = (holidayString) => {
+    const herfstIcon = <><IconA name="leaf" size={15} color="#000" /><Text>   Herfst</Text></>;
+    const kerstIcon = <><IconA name="snowflake-o" size={15} color="#000" /><Text>   Kerst</Text></>;
+    const voorjaarsIcon = <><IconM name="flower-outline" size={15} color="#000" /><Text>   Voorjaar</Text></>;
+    const meiIcon = <><IconF name="sun" size={15} color="#000" /><Text>   Mei</Text></>;
+    const zomerIcon = <><IconA5 name="swimming-pool" size={12} color="#000" /><Text>   Zomer</Text></>;
+    
+    if(holidayString === 'Herfstvakantie') return herfstIcon;
+    if(holidayString === 'Kerstvakantie') return kerstIcon;
+    if(holidayString === 'Voorjaarsvakantie') return voorjaarsIcon;
+    if(holidayString === 'Meivakantie') return meiIcon;
+    if(holidayString === 'Zomervakantie') return zomerIcon;
+  }
 
   const renderHolidaysTable = () => {
-    if (!holidaysData || !holidaysData.content || !holidaysData.content[0] || !holidaysData.content[0].vacations) {
-      return <Text>No data available</Text>;
+    if (!holidaysData || !holidaysData.content || !holidaysData.content[0] || !holidaysData.content[0].vacations || holidaysData.content[0].vacations.length === 0) {
+      return <Text>No holidays available for this region</Text>;
     }
-
+  
     return (
       <View style={styles.tableContainer}>
         <View style={styles.tableHeader}>
           <Text style={styles.headerText}>Holiday</Text>
           <Text style={styles.headerText}>Start Date</Text>
           <Text style={styles.headerText}>End Date</Text>
-          <Text style={styles.headerText}>Compulsory Dates</Text>
         </View>
-        {holidaysData.content[0].vacations.map((holiday, index) => (
-          <View key={index} style={styles.tableRow}>
-            <Text style={styles.rowText}>{holiday.type.trim()}</Text>
-            <Text style={styles.rowText}>{new Date(holiday.regions[0].startdate).toDateString()}</Text>
-            <Text style={styles.rowText}>{new Date(holiday.regions[0].enddate).toDateString()}</Text>
-            <Text style={styles.rowText}>{holiday.compulsorydates === 'true' ? 'Yes' : 'No'}</Text>
-          </View>
-        ))}
+        {holidaysData.content[0].vacations.map((holiday, index) => {
+          let startDate = "";
+          let endDate = "";
+          if (holiday.regions.some((r) => r.region === "heel Nederland")) {
+            const heelNederlandDates = holiday.regions.find((r) => r.region === "heel Nederland");
+            if (heelNederlandDates) {
+              startDate = heelNederlandDates.startdate;
+              endDate = heelNederlandDates.enddate;
+            }
+          } else {
+            const selectedRegionData = holiday.regions.find((r) => r.region === selectedRegion);
+            if (selectedRegionData) {
+              startDate = selectedRegionData.startdate;
+              endDate = selectedRegionData.enddate;
+            }
+          }
+          
+          return (
+            <View key={index} style={styles.tableRow}>
+              <Text style={styles.rowText}>{formatHoliday(holiday.type.trim())}</Text>
+              <Text style={styles.rowText}>{formatDate(startDate)}</Text>
+              <Text style={styles.rowText}>{formatDate(endDate)}</Text>
+            </View>
+          );
+        })}
       </View>
     );
   };
+  
+  
 
   return (
     <View style={styles.container}>
-  <Text style={styles.title}>School Holidays 2023-2024</Text>
-  <Picker
-    selectedValue={selectedRegion}
-    onValueChange={(itemValue) => handleRegionChange(itemValue)}
-    style={styles.picker}
-  >
-    <Picker.Item label="Noord" value="noord" />
-    <Picker.Item label="Midden" value="midden" />
-    <Picker.Item label="Zuid" value="zuid" />
-    {/* Add other regions as needed */}
-  </Picker>
+      <Text style={styles.title}>School Holidays 2023-2024</Text>
+      <Picker
+        selectedValue={selectedRegion}
+        onValueChange={(itemValue) => handleRegionChange(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Noord" value="noord" />
+        <Picker.Item label="Midden" value="midden" />
+        <Picker.Item label="Zuid" value="zuid" />
+      </Picker>
 
-  {filteredHolidays ? renderHolidaysTable(filteredHolidays) : <Text>Loading...</Text>}
-</View>
+      {holidaysData ? renderHolidaysTable() : <Text>Loading...</Text>}
+    </View>
   );
 };
 
@@ -95,7 +138,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginBottom: 20,
-    overflow: 'hidden', // Ensure the picker doesn't overflow its container
+    overflow: 'hidden',
   },
   picker: {
     width: '100%',
@@ -104,14 +147,14 @@ const styles = StyleSheet.create({
 
   tableContainer: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'gray',
     borderRadius: 5,
-    padding: 10,
+    padding: 5,
     width: '100%',
   },
   tableHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     borderBottomWidth: 1,
     paddingBottom: 5,
     marginBottom: 5,
@@ -121,7 +164,7 @@ const styles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     marginBottom: 5,
   },
   rowText: {

@@ -109,7 +109,7 @@ const SettingsScreen = () => {
           />
           {searchCity && searchRegion ? (
             <Text style={styles.head2}>
-              De plaats {searchCity} bevind zich in regio {searchRegion}
+              De plaats {searchCity} bevindt zich in regio {searchRegion}
             </Text> 
           ) : (<Text>&nbsp;</Text>)}
           <MapView
