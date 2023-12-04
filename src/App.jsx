@@ -27,11 +27,11 @@ export default function App() {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.error("Permission to access location was denied");
+        console.log("Permission to access location was denied");
         return;
       }
     } catch (error) {
-      console.error("Error getting location:", error);
+      console.log("Error getting location:", error);
     }
   };
 

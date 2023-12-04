@@ -12,6 +12,7 @@ const SettingsScreen = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [searchCity, setSearchCity] = useState(null);
   const [searchRegion, setSearchRegion] = useState(null);
+  const [error, setError] = useState("");
 
   const handleInputChange = (input) => {
     setText(input);
@@ -32,14 +33,27 @@ const SettingsScreen = () => {
   const getLocation = async () => {
     try {
       let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-      getCity(
-        currentLocation.coords.latitude,
-        currentLocation.coords.longitude
-      );
+      setThings(currentLocation);
+      setError("Uw map is aan het laden");
     } catch (error) {
-      console.error("Error getting location:", error);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setError("Geef ons toegang tot uw locatie");
+      } else {
+        try {
+          let currentLocation = await Location.getCurrentPositionAsync({});
+          setThings(currentLocation);
+          setError("Uw map is aan het laden");
+        } catch (error) {
+          setError("Er gaat iets mis");
+        }
+      }
     }
+  };
+
+  const setThings = (currentLocation) => {
+    setLocation(currentLocation);
+    getCity(currentLocation.coords.latitude, currentLocation.coords.longitude);
   };
 
   const getCity = async (latitude, longitude) => {
@@ -110,8 +124,10 @@ const SettingsScreen = () => {
           {searchCity && searchRegion ? (
             <Text style={styles.head2}>
               De plaats {searchCity} bevindt zich in regio {searchRegion}
-            </Text> 
-          ) : (<Text>&nbsp;</Text>)}
+            </Text>
+          ) : (
+            <Text>&nbsp;</Text>
+          )}
           <MapView
             style={styles.map}
             initialRegion={{
@@ -135,7 +151,7 @@ const SettingsScreen = () => {
           </MapView>
         </>
       ) : (
-        <Text style={styles.error}>Trying to get your location...</Text>
+        <Text style={styles.error}>{error}</Text>
       )}
     </View>
   );
