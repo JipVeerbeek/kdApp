@@ -13,6 +13,7 @@ const SettingsScreen = () => {
   const [searchCity, setSearchCity] = useState(null);
   const [searchRegion, setSearchRegion] = useState(null);
   const [error, setError] = useState("");
+  const [searchedCityCoordinates, setSearchedCityCoordinates] = useState(null);
 
   const handleInputChange = (input) => {
     setText(input);
@@ -83,11 +84,28 @@ const SettingsScreen = () => {
     }
   };
 
-  const inputRegion = (text) => {
-    // console.log(text);
+  const getCoordinatesFromCityName = async (cityName) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          cityName
+        )}`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        return { latitude: parseFloat(lat), longitude: parseFloat(lon) };
+      }
+    } catch (error) {
+      throw new Error("Error fetching coordinates:", error);
+    }
+    return null;
+  };
+
+  const inputRegion = async (text) => {
     let foundRegion = null;
     let foundCity = null;
-
+  
     for (const regio in regionsData) {
       const placesInRegion = regionsData[regio];
       for (const item of placesInRegion) {
@@ -101,9 +119,22 @@ const SettingsScreen = () => {
         break;
       }
     }
-
+  
     setSearchRegion(foundRegion);
     setSearchCity(foundCity);
+  
+    if (foundCity) {
+      try {
+        const coordinates = await getCoordinatesFromCityName(foundCity);
+        if (coordinates) {
+          setSearchedCityCoordinates(coordinates);
+        }
+      } catch (error) {
+        console.error('Error fetching searched city coordinates:', error);
+      }
+    } else {
+      setSearchedCityCoordinates(null);
+    }
   };
 
   return (
@@ -129,26 +160,42 @@ const SettingsScreen = () => {
             <Text>&nbsp;</Text>
           )}
           <MapView
-            style={styles.map}
-            initialRegion={{
+          style={styles.map}
+          region={
+            searchedCityCoordinates
+              ? {
+                  latitude: searchedCityCoordinates.latitude,
+                  longitude: searchedCityCoordinates.longitude,
+                  latitudeDelta: 0.7,
+                  longitudeDelta: 0.7,
+                }
+              : {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.7,
+                  longitudeDelta: 0.7,
+                }
+          }
+          rotateEnabled={false}
+          scrollEnabled={false}
+          zoomEnabled={false}
+        >
+          {searchedCityCoordinates ? (
+            <Marker
+              coordinate={searchedCityCoordinates}
+              title={searchCity}
+            />
+          ) : (
+
+          <Marker
+            coordinate={{
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
-              latitudeDelta: 0.7,
-              longitudeDelta: 0.7,
             }}
-            rotateEnabled={false}
-            scrollEnabled={false}
-            zoomEnabled={false}
-          >
-            <Marker
-              coordinate={{
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-              }}
-              title="My Location"
-              description="This is my current location"
-            />
-          </MapView>
+            title="My Location"
+          />
+          )}
+        </MapView>
         </>
       ) : (
         <Text style={styles.error}>{error}</Text>
