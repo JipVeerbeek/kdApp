@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screens/home";
@@ -7,6 +7,7 @@ import VacationsScreen from "./screens/vacations";
 import AppHeader from "./components/header";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as Location from "expo-location";
+import regionsData from "./regio.json";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,6 +20,10 @@ const TabIcon = ({ name, focused }) => (
 );
 
 export default function App() {
+  const [city, setCity] = useState(null);
+  const [region, setRegion] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -30,8 +35,46 @@ export default function App() {
         console.log("Permission to access location was denied");
         return;
       }
+      getLocation();
     } catch (error) {
       console.log("Error getting location:", error);
+    }
+  };
+
+  const getLocation = async () => {
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      setCurrentLocation(location);
+      getCity(location.coords.latitude, location.coords.longitude);
+    } catch (error) {
+      console.log("Error getting current location:", error);
+    }
+  };
+
+  const getCity = async (latitude, longitude) => {
+    try {
+      let location = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+      if (location && location.length > 0) {
+        setCity(location[0].city);
+        determineRegion(location[0].city);
+      }
+    } catch (error) {
+      console.error("Error getting city:", error);
+    }
+  };
+
+  const determineRegion = (place) => {
+    for (const regio in regionsData) {
+      const placesInRegion = regionsData[regio];
+      for (const item of placesInRegion) {
+        if (item.Plaats === place) {
+          setRegion(regio);
+          return;
+        }
+      }
     }
   };
 
@@ -55,7 +98,7 @@ export default function App() {
             ),
           }}
         >
-          {(props) => <VacationsScreen {...props} />}
+          {(props) => <VacationsScreen {...props} city={city} region={region} />}
         </Tab.Screen>
         <Tab.Screen
           name="Welkom"
@@ -66,7 +109,7 @@ export default function App() {
             ),
           }}
         >
-          {(props) => <HomeScreen {...props} />}
+          {(props) => <HomeScreen {...props} city={city} region={region} />}
         </Tab.Screen>
         <Tab.Screen
           name="Settings"
@@ -77,7 +120,7 @@ export default function App() {
             ),
           }}
         >
-          {(props) => <SettingsScreen {...props} />}
+          {(props) => <SettingsScreen {...props} city={city} region={region} currentLocation={currentLocation} />}
         </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>

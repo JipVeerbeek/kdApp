@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 
 export default function HomeScreen() {
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Met deze app kunt u:</Text>
@@ -14,7 +15,8 @@ export default function HomeScreen() {
         Nederland.
         {"\n"}-{"\n"}
       </Text>
-
+      {/* <Text>Selected City: {city}</Text>
+      <Text>Selected Region: {region}</Text> */}
       <Image
         source={require("./../assets/schoolvakantie.jpg")}
         style={styles.homeImage}

@@ -60,6 +60,21 @@ const VacationsScreen = () => {
     if(holidayString === 'Zomervakantie') return zomerIcon;
   }
 
+  const calculateDaysLeft = (vacationDateString) => {
+    const currentDate = new Date();
+    const vacationDate = new Date(vacationDateString);
+  
+    if (isNaN(vacationDate.getTime())) {
+      return 'Invalid date';
+    }
+  
+    const differenceInTime = vacationDate.getTime() - currentDate.getTime();
+    const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+    return differenceInDays >= 0 ? differenceInDays : '-';
+  };
+  
+  
+
   const renderHolidaysTable = () => {
     if (!holidaysData || !holidaysData.content || !holidaysData.content[0] || !holidaysData.content[0].vacations || holidaysData.content[0].vacations.length === 0) {
       return <Text>No holidays available for this region</Text>;
@@ -71,6 +86,7 @@ const VacationsScreen = () => {
           <Text style={styles.headerText}>Holiday</Text>
           <Text style={styles.headerText}>Start Date</Text>
           <Text style={styles.headerText}>End Date</Text>
+          <Text style={styles.headerText}>Days Left</Text>
         </View>
         {holidaysData.content[0].vacations.map((holiday, index) => {
           let startDate = "";
@@ -94,6 +110,7 @@ const VacationsScreen = () => {
               <Text style={styles.rowText}>{formatHoliday(holiday.type.trim())}</Text>
               <Text style={styles.rowText}>{formatDate(startDate)}</Text>
               <Text style={styles.rowText}>{formatDate(endDate)}</Text>
+              <Text style={styles.rowText}>{calculateDaysLeft(startDate)}</Text>
             </View>
           );
         })}
