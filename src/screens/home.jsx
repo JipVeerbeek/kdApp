@@ -1,26 +1,31 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 
-export default function HomeScreen() {
-
+const HomeScreen = ({ city, region }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Met deze app kunt u:</Text>
+      <Text style={styles.title}>Welkom bij de VakantieApp</Text>
       <Text style={styles.content}>
-        -{"\n"}
         Eenvoudig uw vakanties bekijken op basis van uw locatie of door een
-        specifieke plaats in te stellen.
-        {"\n"}-{"\n"}
+        specifieke plaats in te stellen.{"\n\n"}
         Ontdek de vakantieperiodes voor de regio's Noord, Midden en Zuid in
         Nederland.
-        {"\n"}-{"\n"}
+        {"\n"}
       </Text>
-      {/* <Text>Selected City: {city}</Text>
-      <Text>Selected Region: {region}</Text> */}
       <Image
         source={require("./../assets/schoolvakantie.jpg")}
         style={styles.homeImage}
       />
+      <View style={styles.locationInfo}>
+        <View style={styles.locationItem}>
+          <Text style={styles.locationLabel}>Plaats:</Text>
+          <Text style={styles.locationValue}>{city}</Text>
+        </View>
+        <View style={styles.locationItem}>
+          <Text style={styles.locationLabel}>Regio:</Text>
+          <Text style={styles.locationValue}>{region}</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -29,20 +34,44 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
+    paddingTop: 40,
   },
-  content: {
-    fontSize: 18,
-    textAlign: "center",
+  locationInfo: {
+    alignSelf: "flex-end",
+    marginTop: "auto",
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  locationItem: {
+    flexDirection: "row",
+  },
+  locationLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginRight: 7,
+  },
+  locationValue: {
+    fontSize: 12,
+    fontStyle: "italic",
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: "400",
     marginBottom: 20,
-    marginTop: 20,
+    textAlign: "center",
+  },
+  content: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 24,
   },
   homeImage: {
-    width: 350,
-    height: 350,
-    borderRadius: 5,
+    width: 300,
+    height: 300,
+    borderRadius: 10,
+    marginTop: 20,
   },
 });
+
+export default HomeScreen;

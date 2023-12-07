@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text, TextInput } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import regionsData from "./../regio.json";
+import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = ({ city, region, currentLocation }) => {
   const [text, setText] = useState("");
@@ -9,6 +11,35 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
   const [searchCity, setSearchCity] = useState(null);
   const [searchRegion, setSearchRegion] = useState(null);
   const [searchedCityCoordinates, setSearchedCityCoordinates] = useState(null);
+  const [ready, setReady] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState('');
+
+
+  useEffect(() => {
+    // Check AsyncStorage for selectedRegion
+    AsyncStorage.getItem('selectedRegion')
+      .then((value) => {
+        if (value) {
+          // If a value exists in AsyncStorage, set selectedRegion
+          setSelectedRegion(value);
+        } else {
+          // If AsyncStorage is empty, set default selectedRegion to 'noord'
+          setSelectedRegion('noord');
+          // Save 'noord' to AsyncStorage for future use
+          AsyncStorage.setItem('selectedRegion', 'noord');
+        }
+        // Check if city, region, and currentLocation are available
+        if (city && region && currentLocation) {
+          // Set ready flag after determining selectedRegion and when city, region, and currentLocation are available
+          setReady(true);
+        }
+      })
+      .catch((error) => {
+        console.error('Error reading AsyncStorage:', error);
+      });
+  }, [city, region, currentLocation]);
+  
+
 
   const handleInputChange = (input) => {
     setText(input);
@@ -21,6 +52,16 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
   const handleBlur = () => {
     setIsFocused(false);
   };
+
+  const handleNewRegion = (region) => {
+    setSelectedRegion(region);
+    // Save selectedRegion to AsyncStorage
+    AsyncStorage.setItem('selectedRegion', region)
+      .catch((error) => {
+        console.error('Error saving selectedRegion to AsyncStorage:', error);
+      });
+  };
+ 
 
   const getCoordinatesFromCityName = async (cityName) => {
     try {
@@ -76,27 +117,34 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
   };
 
   return (
+    <>
+       {ready ? (
     <View style={styles.container}>
-      {currentLocation ? (
-        <>
-          {city && <Text style={styles.head1}>Uw locatie: {city}</Text>}
-          {region && <Text style={styles.head2}>Uw regio: {region}</Text>}
+       {searchCity && searchRegion ? (
+         <Text style={styles.head}>
+           {searchCity} bevindt zich in regio {searchRegion}
+         </Text>
+       ) : (
+        <Text style={styles.head}>Zoek uw schoolregio:</Text>
+       )}
           <TextInput
             style={styles.input}
-            placeholder="Zoek regio op plaatsnaam"
+            placeholder="Plaatsnaam"
             onChangeText={handleInputChange}
             value={text}
             autoFocus={false}
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
-          {searchCity && searchRegion ? (
-            <Text style={styles.head2}>
-              De plaats {searchCity} bevindt zich in regio {searchRegion}
-            </Text>
-          ) : (
-            <Text>&nbsp;</Text>
-          )}
+          <Picker
+            selectedValue={selectedRegion}
+            onValueChange={(itemValue) => handleNewRegion(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Noord" value="noord" />
+            <Picker.Item label="Midden" value="midden" />
+            <Picker.Item label="Zuid" value="zuid" />
+          </Picker>
           <MapView
           style={styles.map}
           region={
@@ -137,11 +185,24 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
           />
           )}
         </MapView>
-        </>
-      ) : (
-        <Text style={styles.error}>Er is iets mis gegaan met het ophalen van uw locatie</Text>
-      )}
+        <View style={styles.locationInfo}>
+        <View style={styles.locationItem}>
+          <Text style={styles.locationLabel}>Plaats:</Text>
+          <Text style={styles.locationValue}>{city}</Text>
+        </View>
+        <View style={styles.locationItem}>
+          <Text style={styles.locationLabel}>Regio:</Text>
+          <Text style={styles.locationValue}>{region}</Text>
+        </View>
+      </View>
+      
     </View>
+     ) : (
+      <View>
+      <Text>Loading...</Text>
+    </View>
+     )}
+    </>
   );
 };
 
@@ -149,24 +210,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    paddingTop: 25,
+    paddingHorizontal: 10,
   },
-  head1: {
-    fontSize: 15,
+  head: {
+    fontSize: 17,
     fontWeight: "bold",
-    paddingTop: 15,
-  },
-  head2: {
-    fontSize: 15,
-    fontWeight: "bold",
-    paddingTop: 5,
-    paddingBottom: 15,
-    textAlign: "center",
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingBottom: 10,
   },
   map: {
     width: "90%",
-    height: 400,
+    height: 300,
     paddingTop: 20,
   },
   error: {
@@ -178,9 +232,31 @@ const styles = StyleSheet.create({
     width: "60%",
     borderColor: "gray",
     borderWidth: 1,
-    paddingHorizontal: 10,
     borderRadius: 5,
     textAlign: "center",
+    marginBottom: 40,
+  },
+  locationInfo: {
+    alignSelf: "flex-end",
+    marginTop: "auto",
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  locationItem: {
+    flexDirection: "row",
+  },
+  locationLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginRight: 7,
+  },
+  locationValue: {
+    fontSize: 12,
+    fontStyle: "italic",
+  },
+  picker: {
+    width: '40%',
+    height: 50,
   },
 });
 

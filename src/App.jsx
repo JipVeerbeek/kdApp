@@ -81,7 +81,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Welkom"
+        initialRouteName="Home"
         screenOptions={{
           tabBarStyle: { display: "flex", height: 70 },
           tabBarItemStyle: { justifyContent: "center" },
@@ -101,7 +101,7 @@ export default function App() {
           {(props) => <VacationsScreen {...props} city={city} region={region} />}
         </Tab.Screen>
         <Tab.Screen
-          name="Welkom"
+          name="Home"
           options={{
             tabBarLabel: "Home",
             tabBarIcon: ({ focused }) => (

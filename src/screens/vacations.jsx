@@ -7,7 +7,7 @@ import IconM from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconF from 'react-native-vector-icons/Feather';
 
 
-const VacationsScreen = () => {
+const VacationsScreen = ({ city, region }) => {
   const [holidaysData, setHolidaysData] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState('noord'); // Default region
 
@@ -46,12 +46,26 @@ const VacationsScreen = () => {
     return `${formattedDay}-${formattedMonth}-${year}`;
   };
   
-  const formatHoliday = (holidayString) => {
-    const herfstIcon = <><IconA name="leaf" size={15} color="#000" /><Text>   Herfst</Text></>;
-    const kerstIcon = <><IconA name="snowflake-o" size={15} color="#000" /><Text>   Kerst</Text></>;
-    const voorjaarsIcon = <><IconM name="flower-outline" size={15} color="#000" /><Text>   Voorjaar</Text></>;
-    const meiIcon = <><IconF name="sun" size={15} color="#000" /><Text>   Mei</Text></>;
-    const zomerIcon = <><IconA5 name="swimming-pool" size={12} color="#000" /><Text>   Zomer</Text></>;
+  const formatHolidayTitle = (holidayString) => {
+    const herfstTitle = <Text>Herfst</Text>;
+    const kerstTitle = <Text>Kerst</Text>;
+    const voorjaarsTitle = <Text>Voorjaar</Text>;
+    const meiTitle = <Text>Mei</Text>;
+    const zomerTitle = <Text>Zomer</Text>;
+    
+    if(holidayString === 'Herfstvakantie') return herfstTitle;
+    if(holidayString === 'Kerstvakantie') return kerstTitle;
+    if(holidayString === 'Voorjaarsvakantie') return voorjaarsTitle;
+    if(holidayString === 'Meivakantie') return meiTitle;
+    if(holidayString === 'Zomervakantie') return zomerTitle;
+  }
+
+  const formatHolidayIcon = (holidayString) => {
+    const herfstIcon = <IconA name="leaf" size={15} color="#000" />;
+    const kerstIcon = <IconA name="snowflake-o" size={15} color="#000" />;
+    const voorjaarsIcon = <IconM name="flower-outline" size={15} color="#000" />;
+    const meiIcon = <IconF name="sun" size={15} color="#000" />;
+    const zomerIcon = <IconA5 name="swimming-pool" size={12} color="#000" />;
     
     if(holidayString === 'Herfstvakantie') return herfstIcon;
     if(holidayString === 'Kerstvakantie') return kerstIcon;
@@ -83,9 +97,10 @@ const VacationsScreen = () => {
     return (
       <View style={styles.tableContainer}>
         <View style={styles.tableHeader}>
-          <Text style={styles.headerText}>Holiday</Text>
-          <Text style={styles.headerText}>Start Date</Text>
-          <Text style={styles.headerText}>End Date</Text>
+        <Text style={styles.headerTextI}> </Text>
+          <Text style={styles.headerTextN}>Holiday</Text>
+          <Text style={styles.headerTextD}>Start Date</Text>
+          <Text style={styles.headerTextD}>  End Date</Text>
           <Text style={styles.headerText}>Days Left</Text>
         </View>
         {holidaysData.content[0].vacations.map((holiday, index) => {
@@ -107,9 +122,10 @@ const VacationsScreen = () => {
           
           return (
             <View key={index} style={styles.tableRow}>
-              <Text style={styles.rowText}>{formatHoliday(holiday.type.trim())}</Text>
-              <Text style={styles.rowText}>{formatDate(startDate)}</Text>
-              <Text style={styles.rowText}>{formatDate(endDate)}</Text>
+              <Text style={styles.rowTextI}>{formatHolidayIcon(holiday.type.trim())}</Text>
+              <Text style={styles.rowText}>{formatHolidayTitle(holiday.type.trim())}</Text>
+              <Text style={styles.rowTextD}>{formatDate(startDate)}</Text>
+              <Text style={styles.rowTextD}>{formatDate(endDate)}</Text>
               <Text style={styles.rowText}>{calculateDaysLeft(startDate)}</Text>
             </View>
           );
@@ -134,6 +150,16 @@ const VacationsScreen = () => {
       </Picker>
 
       {holidaysData ? renderHolidaysTable() : <Text>Loading...</Text>}
+      <View style={styles.locationInfo}>
+        <View style={styles.locationItem}>
+          <Text style={styles.locationLabel}>Plaats:</Text>
+          <Text style={styles.locationValue}>{city}</Text>
+        </View>
+        <View style={styles.locationItem}>
+          <Text style={styles.locationLabel}>Regio:</Text>
+          <Text style={styles.locationValue}>{region}</Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -143,25 +169,35 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+  locationInfo: {
+    alignSelf: "flex-end",
+    marginTop: "auto",
     marginBottom: 20,
-    overflow: 'hidden',
+    paddingHorizontal: 10,
+  },
+  locationItem: {
+    flexDirection: "row",
+  },
+  locationLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginRight: 7,
+  },
+  locationValue: {
+    fontSize: 12,
+    fontStyle: "italic",
   },
   picker: {
-    width: '100%',
+    width: '40%',
     height: 50,
   },
-
   tableContainer: {
     borderWidth: 1,
     borderColor: 'gray',
@@ -178,6 +214,21 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerTextI: {
+    fontWeight: 'bold',
+    flex: 0,
+  },
+  headerTextD: {
+    fontWeight: 'bold',
+    flex: 1.5,
+  },
+  headerTextN: {
+    fontWeight: 'bold',
+    flex: 1.5,
+    textAlign: 'center',
   },
   tableRow: {
     flexDirection: 'row',
@@ -187,6 +238,13 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     textAlign: 'center',
+  },
+  rowTextD: {
+    flex: 1.5,
+    textAlign: 'center',
+  },
+  rowTextI: {
+    textAlign: 'left',
   },
 });
 
