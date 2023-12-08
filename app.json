@@ -3,7 +3,7 @@
     "name": "kdApp",
     "slug": "kdApp",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./src/assets/pepe.png",
     "userInterfaceStyle": "light",
     "splash": {

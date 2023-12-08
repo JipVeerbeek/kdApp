@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import IconA from "react-native-vector-icons/FontAwesome";
 import IconA5 from "react-native-vector-icons/FontAwesome5";
@@ -190,7 +190,7 @@ const VacationsScreen = ({ city, region }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>School Holidays</Text>
       <Text style={styles.title}>{selectedYear}</Text>
       <Picker
@@ -226,7 +226,7 @@ const VacationsScreen = ({ city, region }) => {
           <Text style={styles.locationValue}>{region}</Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
