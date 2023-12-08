@@ -18,6 +18,9 @@ const HomeScreen = ({ city, region }) => {
       />
       <View style={styles.locationInfo}>
         <View style={styles.locationItem}>
+          <Text style={styles.locationTitle}>Uw locatie:</Text>
+        </View>
+        <View style={styles.locationItem}>
           <Text style={styles.locationLabel}>Plaats:</Text>
           <Text style={styles.locationValue}>{city}</Text>
         </View>
@@ -28,7 +31,7 @@ const HomeScreen = ({ city, region }) => {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -53,6 +56,12 @@ const styles = StyleSheet.create({
   },
   locationValue: {
     fontSize: 12,
+    fontStyle: "italic",
+  },
+  locationTitle: {
+    fontSize: 13,
+    fontWeight: "500",
+    marginRight: 7,
     fontStyle: "italic",
   },
   title: {

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text, TextInput } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import regionsData from "./../regio.json";
-import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SettingsScreen = ({ city, region, currentLocation }) => {
   const [text, setText] = useState("");
@@ -12,38 +11,18 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
   const [searchRegion, setSearchRegion] = useState(null);
   const [searchedCityCoordinates, setSearchedCityCoordinates] = useState(null);
   const [ready, setReady] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState('');
-
 
   useEffect(() => {
-    // Check AsyncStorage for selectedRegion
-    AsyncStorage.getItem('selectedRegion')
-      .then((value) => {
-        if (value) {
-          // If a value exists in AsyncStorage, set selectedRegion
-          setSelectedRegion(value);
-        } else {
-          // If AsyncStorage is empty, set default selectedRegion to 'noord'
-          setSelectedRegion('noord');
-          // Save 'noord' to AsyncStorage for future use
-          AsyncStorage.setItem('selectedRegion', 'noord');
-        }
-        // Check if city, region, and currentLocation are available
-        if (city && region && currentLocation) {
-          // Set ready flag after determining selectedRegion and when city, region, and currentLocation are available
-          setReady(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Error reading AsyncStorage:', error);
-      });
+    if (city && region && currentLocation) {
+      setReady(true);
+    }
+    loadStoredText();
   }, [city, region, currentLocation]);
-  
-
 
   const handleInputChange = (input) => {
     setText(input);
     inputRegion(input);
+    storeTextInAsyncStorage(input);
   };
   const handleFocus = () => {
     setIsFocused(true);
@@ -53,15 +32,27 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
     setIsFocused(false);
   };
 
-  const handleNewRegion = (region) => {
-    setSelectedRegion(region);
-    // Save selectedRegion to AsyncStorage
-    AsyncStorage.setItem('selectedRegion', region)
-      .catch((error) => {
-        console.error('Error saving selectedRegion to AsyncStorage:', error);
-      });
+  const loadStoredText = async () => {
+    try {
+      const storedText = await AsyncStorage.getItem("storedText");
+      if (storedText !== null) {
+        setText(storedText);
+        inputRegion(storedText);
+      } else {
+        setText(null);
+      }
+    } catch (error) {
+      console.log("Error loading stored text:", error);
+    }
   };
- 
+
+  const storeTextInAsyncStorage = async (newText) => {
+    try {
+      await AsyncStorage.setItem("storedText", newText);
+    } catch (error) {
+      console.log("Error storing text:", error);
+    }
+  };
 
   const getCoordinatesFromCityName = async (cityName) => {
     try {
@@ -84,7 +75,7 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
   const inputRegion = async (text) => {
     let foundRegion = null;
     let foundCity = null;
-  
+
     for (const regio in regionsData) {
       const placesInRegion = regionsData[regio];
       for (const item of placesInRegion) {
@@ -98,7 +89,7 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
         break;
       }
     }
-  
+
     setSearchRegion(foundRegion);
     setSearchCity(foundCity);
 
@@ -109,7 +100,7 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
           setSearchedCityCoordinates(coordinates);
         }
       } catch (error) {
-        console.error('Error fetching searched city coordinates:', error);
+        console.log("Error fetching searched city coordinates:", error);
       }
     } else {
       setSearchedCityCoordinates(null);
@@ -118,15 +109,15 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
 
   return (
     <>
-       {ready ? (
-    <View style={styles.container}>
-       {searchCity && searchRegion ? (
-         <Text style={styles.head}>
-           {searchCity} bevindt zich in regio {searchRegion}
-         </Text>
-       ) : (
-        <Text style={styles.head}>Zoek uw schoolregio:</Text>
-       )}
+      {ready ? (
+        <View style={styles.container}>
+          {searchCity && searchRegion ? (
+            <Text style={styles.head}>
+              {searchCity} bevindt zich in regio {searchRegion}
+            </Text>
+          ) : (
+            <Text style={styles.head}>Zoek uw schoolregio:</Text>
+          )}
           <TextInput
             style={styles.input}
             placeholder="Plaatsnaam"
@@ -136,72 +127,61 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
-          <Picker
-            selectedValue={selectedRegion}
-            onValueChange={(itemValue) => handleNewRegion(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Noord" value="noord" />
-            <Picker.Item label="Midden" value="midden" />
-            <Picker.Item label="Zuid" value="zuid" />
-          </Picker>
           <MapView
-          style={styles.map}
-          region={
-            searchedCityCoordinates
-              ? {
-                  latitude: searchedCityCoordinates.latitude,
-                  longitude: searchedCityCoordinates.longitude,
-                  latitudeDelta: 0.7,
-                  longitudeDelta: 0.7,
-                }
-              : {
+            style={styles.map}
+            region={
+              searchedCityCoordinates
+                ? {
+                    latitude: searchedCityCoordinates.latitude,
+                    longitude: searchedCityCoordinates.longitude,
+                    latitudeDelta: 0.7,
+                    longitudeDelta: 0.7,
+                  }
+                : {
+                    latitude: currentLocation.coords.latitude,
+                    longitude: currentLocation.coords.longitude,
+                    latitudeDelta: 0.7,
+                    longitudeDelta: 0.7,
+                  }
+            }
+            rotateEnabled={false}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            showsCompass={false}
+            pitchEnabled={false}
+            toolbarEnabled={false}
+          >
+            {searchedCityCoordinates ? (
+              <Marker coordinate={searchedCityCoordinates} title={searchCity} />
+            ) : (
+              <Marker
+                coordinate={{
                   latitude: currentLocation.coords.latitude,
                   longitude: currentLocation.coords.longitude,
-                  latitudeDelta: 0.7,
-                  longitudeDelta: 0.7,
-                }
-          }
-          rotateEnabled={false}
-          scrollEnabled={false}
-          zoomEnabled={false}
-          showsCompass={false}
-          pitchEnabled={false}
-          toolbarEnabled={false}
-        >
-          {searchedCityCoordinates ? (
-            <Marker
-              coordinate={searchedCityCoordinates}
-              title={searchCity}
-            />
-          ) : (
-
-          <Marker
-            coordinate={{
-              latitude: currentLocation.coords.latitude,
-              longitude: currentLocation.coords.longitude,
-            }}
-            title="My Location"
-          />
-          )}
-        </MapView>
-        <View style={styles.locationInfo}>
-        <View style={styles.locationItem}>
-          <Text style={styles.locationLabel}>Plaats:</Text>
-          <Text style={styles.locationValue}>{city}</Text>
+                }}
+                title="My Location"
+              />
+            )}
+          </MapView>
+          <View style={styles.locationInfo}>
+            <View style={styles.locationItem}>
+              <Text style={styles.locationTitle}>Uw locatie:</Text>
+            </View>
+            <View style={styles.locationItem}>
+              <Text style={styles.locationLabel}>Plaats:</Text>
+              <Text style={styles.locationValue}>{city}</Text>
+            </View>
+            <View style={styles.locationItem}>
+              <Text style={styles.locationLabel}>Regio:</Text>
+              <Text style={styles.locationValue}>{region}</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.locationItem}>
-          <Text style={styles.locationLabel}>Regio:</Text>
-          <Text style={styles.locationValue}>{region}</Text>
+      ) : (
+        <View>
+          <Text>Loading...</Text>
         </View>
-      </View>
-      
-    </View>
-     ) : (
-      <View>
-      <Text>Loading...</Text>
-    </View>
-     )}
+      )}
     </>
   );
 };
@@ -250,12 +230,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginRight: 7,
   },
+  locationTitle: {
+    fontSize: 13,
+    fontWeight: "500",
+    marginRight: 7,
+    fontStyle: "italic",
+  },
   locationValue: {
     fontSize: 12,
     fontStyle: "italic",
   },
   picker: {
-    width: '40%',
+    width: "40%",
     height: 50,
   },
 });
