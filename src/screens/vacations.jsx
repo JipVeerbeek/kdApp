@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, SafeAreaView, Text, StyleSheet, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import IconA from "react-native-vector-icons/FontAwesome";
 import IconA5 from "react-native-vector-icons/FontAwesome5";
@@ -190,54 +190,60 @@ const VacationsScreen = ({ city, region }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>School Holidays</Text>
-      <Text style={styles.title}>{selectedYear}</Text>
-      <Picker
-        selectedValue={selectedYear}
-        onValueChange={(itemValue) => handleSelectedYear(itemValue)}
-        style={styles.pickerD}
-      >
-        <Picker.Item label="2023-2024" value="2023-2024" />
-        <Picker.Item label="2024-2025" value="2024-2025" />
-        <Picker.Item label="2025-2026" value="2025-2026" />
-      </Picker>
-      <Picker
-        selectedValue={selectedRegion}
-        onValueChange={(itemValue) => handleNewRegion(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Noord" value="noord" />
-        <Picker.Item label="Midden" value="midden" />
-        <Picker.Item label="Zuid" value="zuid" />
-      </Picker>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>School Holidays</Text>
+        <Text style={styles.title}>{selectedYear}</Text>
+        <Picker
+          selectedValue={selectedYear}
+          onValueChange={(itemValue) => handleSelectedYear(itemValue)}
+          style={styles.pickerD}
+        >
+          <Picker.Item label="2023-2024" value="2023-2024" />
+          <Picker.Item label="2024-2025" value="2024-2025" />
+          <Picker.Item label="2025-2026" value="2025-2026" />
+        </Picker>
+        <Picker
+          selectedValue={selectedRegion}
+          onValueChange={(itemValue) => handleNewRegion(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Noord" value="noord" />
+          <Picker.Item label="Midden" value="midden" />
+          <Picker.Item label="Zuid" value="zuid" />
+        </Picker>
 
-      {holidaysData ? renderHolidaysTable() : <Text>Loading...</Text>}
-      <View style={styles.locationInfo}>
-        <View style={styles.locationItem}>
-          <Text style={styles.locationTitle}>Uw locatie:</Text>
+        {holidaysData ? renderHolidaysTable() : <Text>Loading...</Text>}
+        <View style={styles.locationInfo}>
+          <View style={styles.locationItem}>
+            <Text style={styles.locationTitle}>Uw locatie:</Text>
+          </View>
+          <View style={styles.locationItem}>
+            <Text style={styles.locationLabel}>Plaats:</Text>
+            <Text style={styles.locationValue}>{city}</Text>
+          </View>
+          <View style={styles.locationItem}>
+            <Text style={styles.locationLabel}>Regio:</Text>
+            <Text style={styles.locationValue}>{region}</Text>
+          </View>
         </View>
-        <View style={styles.locationItem}>
-          <Text style={styles.locationLabel}>Plaats:</Text>
-          <Text style={styles.locationValue}>{city}</Text>
-        </View>
-        <View style={styles.locationItem}>
-          <Text style={styles.locationLabel}>Regio:</Text>
-          <Text style={styles.locationValue}>{region}</Text>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 10,
-    marginTop: 40,
+    paddingTop: 25,
   },
+
   title: {
     fontSize: 24,
     fontWeight: "400",
@@ -281,6 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 5,
     width: "100%",
+    marginBottom: 20,
   },
   tableHeader: {
     flexDirection: "row",

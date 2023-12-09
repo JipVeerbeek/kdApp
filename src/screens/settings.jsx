@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, TextInput } from "react-native";
+import {
+  ScrollView,
+  View,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import regionsData from "./../regio.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -108,91 +115,103 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
   };
 
   return (
-    <>
-      {ready ? (
-        <View style={styles.container}>
-          {searchCity && searchRegion ? (
-            <Text style={styles.head}>
-              {searchCity} bevindt zich in regio {searchRegion}
-            </Text>
-          ) : (
-            <Text style={styles.head}>Zoek uw schoolregio:</Text>
-          )}
-          <TextInput
-            style={styles.input}
-            placeholder="Plaatsnaam"
-            onChangeText={handleInputChange}
-            value={text}
-            autoFocus={false}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-          />
-          <MapView
-            style={styles.map}
-            region={
-              searchedCityCoordinates
-                ? {
-                    latitude: searchedCityCoordinates.latitude,
-                    longitude: searchedCityCoordinates.longitude,
-                    latitudeDelta: 0.7,
-                    longitudeDelta: 0.7,
-                  }
-                : {
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {ready ? (
+          <View style={styles.innerContainer}>
+            {searchCity && searchRegion ? (
+              <Text style={styles.head}>
+                {searchCity} bevindt zich in regio {searchRegion}
+              </Text>
+            ) : (
+              <Text style={styles.head}>Zoek uw schoolregio:</Text>
+            )}
+            <TextInput
+              style={styles.input}
+              placeholder="Plaatsnaam"
+              onChangeText={handleInputChange}
+              value={text}
+              autoFocus={false}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+            <MapView
+              style={styles.map}
+              region={
+                searchedCityCoordinates
+                  ? {
+                      latitude: searchedCityCoordinates.latitude,
+                      longitude: searchedCityCoordinates.longitude,
+                      latitudeDelta: 0.7,
+                      longitudeDelta: 0.7,
+                    }
+                  : {
+                      latitude: currentLocation.coords.latitude,
+                      longitude: currentLocation.coords.longitude,
+                      latitudeDelta: 0.7,
+                      longitudeDelta: 0.7,
+                    }
+              }
+              rotateEnabled={false}
+              scrollEnabled={false}
+              zoomEnabled={false}
+              showsCompass={false}
+              pitchEnabled={false}
+              toolbarEnabled={false}
+            >
+              {searchedCityCoordinates ? (
+                <Marker
+                  coordinate={searchedCityCoordinates}
+                  title={searchCity}
+                />
+              ) : (
+                <Marker
+                  coordinate={{
                     latitude: currentLocation.coords.latitude,
                     longitude: currentLocation.coords.longitude,
-                    latitudeDelta: 0.7,
-                    longitudeDelta: 0.7,
-                  }
-            }
-            rotateEnabled={false}
-            scrollEnabled={false}
-            zoomEnabled={false}
-            showsCompass={false}
-            pitchEnabled={false}
-            toolbarEnabled={false}
-          >
-            {searchedCityCoordinates ? (
-              <Marker coordinate={searchedCityCoordinates} title={searchCity} />
-            ) : (
-              <Marker
-                coordinate={{
-                  latitude: currentLocation.coords.latitude,
-                  longitude: currentLocation.coords.longitude,
-                }}
-                title="My Location"
-              />
-            )}
-          </MapView>
-          <View style={styles.locationInfo}>
-            <View style={styles.locationItem}>
-              <Text style={styles.locationTitle}>Uw locatie:</Text>
-            </View>
-            <View style={styles.locationItem}>
-              <Text style={styles.locationLabel}>Plaats:</Text>
-              <Text style={styles.locationValue}>{city}</Text>
-            </View>
-            <View style={styles.locationItem}>
-              <Text style={styles.locationLabel}>Regio:</Text>
-              <Text style={styles.locationValue}>{region}</Text>
+                  }}
+                  title="My Location"
+                />
+              )}
+            </MapView>
+            <View style={styles.locationInfo}>
+              <View style={styles.locationItem}>
+                <Text style={styles.locationTitle}>Uw locatie:</Text>
+              </View>
+              <View style={styles.locationItem}>
+                <Text style={styles.locationLabel}>Plaats:</Text>
+                <Text style={styles.locationValue}>{city}</Text>
+              </View>
+              <View style={styles.locationItem}>
+                <Text style={styles.locationLabel}>Regio:</Text>
+                <Text style={styles.locationValue}>{region}</Text>
+              </View>
             </View>
           </View>
-        </View>
-      ) : (
-        <View>
-          <Text>Loading...</Text>
-        </View>
-      )}
-    </>
+        ) : (
+          <View>
+            <Text>Loading...</Text>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    paddingTop: 25,
-    paddingHorizontal: 10,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  innerContainer: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingTop: 25,
+  },
+
   head: {
     fontSize: 17,
     fontWeight: "bold",
