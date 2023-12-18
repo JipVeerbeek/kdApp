@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./screens/home";
+import AboutScreen from "./screens/about";
 import SettingsScreen from "./screens/settings";
 import VacationsScreen from "./screens/vacations";
 import AppHeader from "./components/header";
@@ -10,6 +12,7 @@ import * as Location from "expo-location";
 import regionsData from "./regio.json";
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 const TabIcon = ({ name, focused }) => (
   <Icon
@@ -20,6 +23,25 @@ const TabIcon = ({ name, focused }) => (
 );
 
 export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Start"
+          component={Home}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="About"
+          component={AboutScreen}
+          options={{ header: (props) => <AppHeader {...props} /> }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+function Home() {
   const [city, setCity] = useState(null);
   const [region, setRegion] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -79,50 +101,53 @@ export default function App() {
   };
 
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          tabBarStyle: { display: "flex", height: 70 },
-          tabBarItemStyle: { justifyContent: "center" },
-          header: (props) => <AppHeader {...props} />,
-          tabBarLabelStyle: { color: "black" },
+    <Tab.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        tabBarStyle: { display: "flex", height: 70 },
+        tabBarItemStyle: { justifyContent: "center" },
+        header: (props) => <AppHeader {...props} />,
+        tabBarLabelStyle: { color: "black" },
+      }}
+    >
+      <Tab.Screen
+        name="Vacations"
+        options={{
+          tabBarLabel: "Vacations",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="suitcase" focused={focused} />
+          ),
         }}
       >
-        <Tab.Screen
-          name="Vacations"
-          options={{
-            tabBarLabel: "Vacations",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon name="suitcase" focused={focused} />
-            ),
-          }}
-        >
-          {(props) => <VacationsScreen {...props} city={city} region={region} />}
-        </Tab.Screen>
-        <Tab.Screen
-          name="Home"
-          options={{
-            tabBarLabel: "Home",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon name="home" focused={focused} />
-            ),
-          }}
-        >
-          {(props) => <HomeScreen {...props} city={city} region={region} />}
-        </Tab.Screen>
-        <Tab.Screen
-          name="Settings"
-          options={{
-            tabBarLabel: "Settings",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon name="cog" focused={focused} />
-            ),
-          }}
-        >
-          {(props) => <SettingsScreen {...props} city={city} region={region} currentLocation={currentLocation} />}
-        </Tab.Screen>
-      </Tab.Navigator>
-    </NavigationContainer>
+        {(props) => <VacationsScreen {...props} city={city} region={region} />}
+      </Tab.Screen>
+      <Tab.Screen
+        name="Home"
+        options={{
+          tabBarLabel: "Home",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="home" focused={focused} />
+          ),
+        }}
+      >
+        {(props) => <HomeScreen {...props} city={city} region={region} />}
+      </Tab.Screen>
+      <Tab.Screen
+        name="Settings"
+        options={{
+          tabBarLabel: "Settings",
+          tabBarIcon: ({ focused }) => <TabIcon name="cog" focused={focused} />,
+        }}
+      >
+        {(props) => (
+          <SettingsScreen
+            {...props}
+            city={city}
+            region={region}
+            currentLocation={currentLocation}
+          />
+        )}
+      </Tab.Screen>
+    </Tab.Navigator>
   );
 }
