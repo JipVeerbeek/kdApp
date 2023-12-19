@@ -4,10 +4,10 @@
     "slug": "kdApp",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./src/assets/pepe.png",
+    "icon": "./src/assets/homeicon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./src/assets/pepe.png",
+      "image": "./src/assets/screen.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,12 +19,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/pepe.png",
+        "foregroundImage": "./src/assets/screen.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./src/assets/pepe.png"
+      "favicon": "./src/assets/screenicon.png"
     }
   }
 }

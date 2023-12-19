@@ -190,7 +190,9 @@ const SettingsScreen = ({ city, region, currentLocation }) => {
           </View>
         ) : (
           <View>
-            <Text>Loading...</Text>
+            <Text style={styles.loadTitle}>Even geduld a.u.b.</Text>
+            <Text style={styles.loadContent}>Wij proberen uw locatie op te halen.</Text>
+            <Text style={styles.loadError}>Check of wij toegang hebben tot uw locatie als dit te lang duurt.</Text>
           </View>
         )}
       </ScrollView>
@@ -211,11 +213,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 25,
   },
-
   head: {
     fontSize: 17,
     fontWeight: "bold",
     paddingBottom: 10,
+  },
+  loadTitle: {
+    fontSize: 15,
+    paddingTop: 10,
+    textAlign: "center",
+  },
+  loadContent: {
+    fontSize: 13,
+    paddingTop: 5,
+    textAlign: "center",
+  },
+  loadError: {
+    fontSize: 10,
+    paddingTop: 5,
+    textAlign: "center",
   },
   map: {
     width: "90%",
